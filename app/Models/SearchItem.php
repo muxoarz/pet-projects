@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Database\Factories\SearchItemFactory;
@@ -14,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $description
  * @property-read Search|null $search
  */
-class SearchItem extends Model
+final class SearchItem extends Model
 {
     /** @use HasFactory<SearchItemFactory> */
     use HasFactory;

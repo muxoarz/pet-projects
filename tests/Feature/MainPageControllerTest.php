@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Enums\CategoryEnum;
@@ -10,7 +12,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 use Mockery;
 use Tests\TestCase;
 
-class MainPageControllerTest extends TestCase
+final class MainPageControllerTest extends TestCase
 {
     public function test_main_page_can_be_rendered_without_parameters(): void
     {
@@ -83,7 +85,7 @@ class MainPageControllerTest extends TestCase
             ->has('categories', count($categories))
             ->where('categories.0', [
                 'value' => $firstCategory,
-                'label' => $categories[$firstCategory]
+                'label' => $categories[$firstCategory],
             ])
         );
     }
@@ -98,7 +100,7 @@ class MainPageControllerTest extends TestCase
             ->has('levels', count($levels))
             ->where('levels.0', [
                 'value' => $firstLevel,
-                'label' => $levels[$firstLevel]
+                'label' => $levels[$firstLevel],
             ])
         );
     }

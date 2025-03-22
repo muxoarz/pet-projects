@@ -11,7 +11,8 @@ use App\Services\GenerateIdeasService;
 use Inertia\Inertia;
 use Inertia\Response;
 
-final class MainPageController extends Controller {
+final class MainPageController extends Controller
+{
     /**
      * Display the main page.
      */
@@ -32,11 +33,11 @@ final class MainPageController extends Controller {
             'category' => $category?->value,
             'level' => $level?->value,
             'categories' => collect(CategoryEnum::toArrayWithLabels())
-                ->map(fn($label, $value) => ['value' => $value, 'label' => $label])
+                ->map(fn ($label, $value) => ['value' => $value, 'label' => $label])
                 ->values()
                 ->all(),
             'levels' => collect(LevelEnum::toArrayWithLabels())
-                ->map(fn($label, $value) => ['value' => $value, 'label' => $label])
+                ->map(fn ($label, $value) => ['value' => $value, 'label' => $label])
                 ->values()
                 ->all(),
             'ideas' => $ideas,

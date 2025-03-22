@@ -1,14 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Enums\CategoryEnum;
 use App\Enums\LevelEnum;
-use App\Models\Search;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
-class IdeaControllerTest extends TestCase
+final class IdeaControllerTest extends TestCase
 {
     public function test_main_page_can_be_rendered(): void
     {
@@ -33,7 +34,7 @@ class IdeaControllerTest extends TestCase
             ->has('categories', count($categories))
             ->where('categories.0', [
                 'value' => $firstCategory,
-                'label' => $categories[$firstCategory]
+                'label' => $categories[$firstCategory],
             ])
         );
     }
@@ -48,7 +49,7 @@ class IdeaControllerTest extends TestCase
             ->has('levels', count($levels))
             ->where('levels.0', [
                 'value' => $firstLevel,
-                'label' => $levels[$firstLevel]
+                'label' => $levels[$firstLevel],
             ])
         );
     }
