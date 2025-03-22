@@ -68,7 +68,7 @@ jobs:
           DB_DATABASE: petprojects_test
           DB_USERNAME: root
           DB_PASSWORD: password
-        run: php artisan test --parallel
+        run: php artisan test
 
   build:
     name: Build Application
