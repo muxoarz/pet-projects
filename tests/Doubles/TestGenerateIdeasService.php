@@ -8,7 +8,7 @@ use App\DTOs\IdeaDTO;
 
 final class TestGenerateIdeasService
 {
-    /** @var array<int, array<string, string>|IdeaDTO> $mockIdeas */
+    /** @var array<int, array<string, string>|IdeaDTO> */
     private array $mockIdeas {
         set {
             $this->mockIdeas = $value;
@@ -16,7 +16,7 @@ final class TestGenerateIdeasService
     }
 
     /**
-     * @param array<int, array<string, string>|IdeaDTO> $mockIdeas
+     * @param  array<int, array<string, string>|IdeaDTO>  $mockIdeas
      */
     public function __construct(array $mockIdeas = [])
     {
@@ -30,5 +30,4 @@ final class TestGenerateIdeasService
     {
         return $this->mockIdeas;
     }
-
 }
