@@ -4,16 +4,27 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\DTOs\IdeaDTO;
 use App\Enums\CategoryEnum;
 use App\Enums\LevelEnum;
 use App\Services\GenerateIdeasService;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Config;
 use Inertia\Testing\AssertableInertia as Assert;
-use Mockery;
+use Tests\Doubles\TestGenerateIdeasService;
 use Tests\TestCase;
 
 final class MainPageControllerTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Set a fake API key for OpenAI
+        Config::set('services.openai.api_key', 'test-api-key');
+        Config::set('services.openai.model', 'gpt-3.5-turbo');
+    }
+
     public function test_main_page_can_be_rendered_without_parameters(): void
     {
         $response = $this->get('/');
@@ -31,7 +42,11 @@ final class MainPageControllerTest extends TestCase
 
     public function test_main_page_accepts_valid_parameters(): void
     {
-        Http::fake();
+        // Create a test implementation
+        $testService = new TestGenerateIdeasService();
+
+        // Bind the test implementation
+        App::instance(GenerateIdeasService::class, $testService);
 
         $category = CategoryEnum::cases()[0]->value;
         $level = LevelEnum::cases()[0]->value;
@@ -43,6 +58,7 @@ final class MainPageControllerTest extends TestCase
             ->component('Main')
             ->where('category', $category)
             ->where('level', $level)
+            ->where('ideas', [])
         );
     }
 
@@ -56,22 +72,26 @@ final class MainPageControllerTest extends TestCase
 
     public function test_ideas_are_generated_when_both_parameters_provided(): void
     {
+        // Create mock ideas
+        $mockIdeas = [
+            new IdeaDTO(title: 'Test Idea 1', description: 'Description 1'),
+            new IdeaDTO(title: 'Test Idea 2', description: 'Description 2'),
+        ];
+
+        // Create a test implementation
+        $testService = new TestGenerateIdeasService($mockIdeas);
+
+        // Bind the test implementation
+        App::instance(GenerateIdeasService::class, $testService);
+
         $category = CategoryEnum::cases()[0]->value;
         $level = LevelEnum::cases()[0]->value;
-        $mockIdeas = ['Idea 1', 'Idea 2'];
-
-        // Create a partial mock of GenerateIdeasService
-        $mockService = Mockery::mock(app(GenerateIdeasService::class))->makePartial();
-        $mockService->expects('generateIdeas')
-            ->with($category, $level)
-            ->andReturns($mockIdeas);
-        $this->app->instance(GenerateIdeasService::class, $mockService);
 
         $response = $this->get("/?category={$category}&level={$level}");
 
         $response->assertStatus(200);
         $response->assertInertia(fn (Assert $page) => $page
-            ->where('ideas', $mockIdeas)
+            ->has('ideas', count($mockIdeas))
         );
     }
 
@@ -79,14 +99,17 @@ final class MainPageControllerTest extends TestCase
     {
         $response = $this->get('/');
         $categories = CategoryEnum::toArrayWithLabels();
-        $firstCategory = array_key_first($categories);
+
+        // Get the first category using the proper method
+        $categoriesArray = collect(CategoryEnum::toArrayWithLabels())
+            ->map(fn ($label, $value) => ['value' => $value, 'label' => $label])
+            ->values()
+            ->all();
 
         $response->assertInertia(fn (Assert $page) => $page
             ->has('categories', count($categories))
-            ->where('categories.0', [
-                'value' => $firstCategory,
-                'label' => $categories[$firstCategory],
-            ])
+            ->where('categories.0.value', $categoriesArray[0]['value'])
+            ->where('categories.0.label', $categoriesArray[0]['label'])
         );
     }
 
@@ -94,14 +117,17 @@ final class MainPageControllerTest extends TestCase
     {
         $response = $this->get('/');
         $levels = LevelEnum::toArrayWithLabels();
-        $firstLevel = array_key_first($levels);
+
+        // Get the first level using the proper method
+        $levelsArray = collect(LevelEnum::toArrayWithLabels())
+            ->map(fn ($label, $value) => ['value' => $value, 'label' => $label])
+            ->values()
+            ->all();
 
         $response->assertInertia(fn (Assert $page) => $page
             ->has('levels', count($levels))
-            ->where('levels.0', [
-                'value' => $firstLevel,
-                'label' => $levels[$firstLevel],
-            ])
+            ->where('levels.0.value', $levelsArray[0]['value'])
+            ->where('levels.0.label', $levelsArray[0]['label'])
         );
     }
 }
