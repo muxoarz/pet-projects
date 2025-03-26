@@ -109,7 +109,7 @@ jobs:
             --exclude=".github" \
             --exclude="node_modules" \
             --exclude="tests" \
-            --warning=no-file-changed \
+            --exclude="artifact" \
             .
 
       - name: Upload Artifact
