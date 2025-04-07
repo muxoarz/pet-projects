@@ -7,11 +7,13 @@ namespace Tests\Feature;
 use App\Enums\CategoryEnum;
 use App\Enums\LevelEnum;
 use Inertia\Testing\AssertableInertia as Assert;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 final class IdeaControllerTest extends TestCase
 {
-    public function test_main_page_can_be_rendered(): void
+    #[Test]
+    public function main_page_can_be_rendered(): void
     {
         $response = $this->get(route('main'));
 
@@ -24,7 +26,8 @@ final class IdeaControllerTest extends TestCase
         );
     }
 
-    public function test_categories_are_properly_formatted(): void
+    #[Test]
+    public function categories_are_properly_formatted(): void
     {
         $response = $this->get(route('main'));
         $categories = CategoryEnum::toArrayWithLabels();
@@ -39,7 +42,8 @@ final class IdeaControllerTest extends TestCase
         );
     }
 
-    public function test_levels_are_properly_formatted(): void
+    #[Test]
+    public function levels_are_properly_formatted(): void
     {
         $response = $this->get(route('main'));
         $levels = LevelEnum::toArrayWithLabels();

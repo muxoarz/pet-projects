@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\DTOs\IdeaDTO;
+use App\DTOs\IdeaDto;
 use App\Enums\CategoryEnum;
 use App\Enums\LevelEnum;
 use App\Services\GenerateIdeasService;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 use Inertia\Testing\AssertableInertia as Assert;
-use Tests\Doubles\TestGenerateIdeasService;
+use Mockery\MockInterface;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 final class MainPageControllerTest extends TestCase
@@ -25,7 +25,8 @@ final class MainPageControllerTest extends TestCase
         Config::set('services.openai.model', 'gpt-3.5-turbo');
     }
 
-    public function test_main_page_can_be_rendered_without_parameters(): void
+    #[Test]
+    public function main_page_can_be_rendered_without_parameters(): void
     {
         $response = $this->get('/');
 
@@ -40,13 +41,14 @@ final class MainPageControllerTest extends TestCase
         );
     }
 
-    public function test_main_page_accepts_valid_parameters(): void
+    #[Test]
+    public function main_page_accepts_valid_parameters(): void
     {
-        // Create a test implementation
-        $testService = new TestGenerateIdeasService();
-
-        // Bind the test implementation
-        App::instance(GenerateIdeasService::class, $testService);
+        $this->mock(GenerateIdeasService::class, function (MockInterface $mock) {
+            $mock->expects('generateIdeas')
+                ->with(CategoryEnum::cases()[0]->value, LevelEnum::cases()[0]->value)
+                ->andReturns([]);
+        });
 
         $category = CategoryEnum::cases()[0]->value;
         $level = LevelEnum::cases()[0]->value;
@@ -62,7 +64,8 @@ final class MainPageControllerTest extends TestCase
         );
     }
 
-    public function test_main_page_handles_invalid_parameters(): void
+    #[Test]
+    public function main_page_handles_invalid_parameters(): void
     {
         $response = $this->get('/?category=invalid&level=invalid');
 
@@ -70,19 +73,20 @@ final class MainPageControllerTest extends TestCase
         $response->assertSessionHasErrors(['category', 'level']);
     }
 
-    public function test_ideas_are_generated_when_both_parameters_provided(): void
+    #[Test]
+    public function ideas_are_generated_when_both_parameters_provided(): void
     {
         // Create mock ideas
         $mockIdeas = [
-            new IdeaDTO(title: 'Test Idea 1', description: 'Description 1'),
-            new IdeaDTO(title: 'Test Idea 2', description: 'Description 2'),
+            new IdeaDto(title: 'Test Idea 1', description: 'Description 1'),
+            new IdeaDto(title: 'Test Idea 2', description: 'Description 2'),
         ];
 
-        // Create a test implementation
-        $testService = new TestGenerateIdeasService($mockIdeas);
-
-        // Bind the test implementation
-        App::instance(GenerateIdeasService::class, $testService);
+        $this->mock(GenerateIdeasService::class, function (MockInterface $mock) use ($mockIdeas) {
+            $mock->expects('generateIdeas')
+                ->with(CategoryEnum::cases()[0]->value, LevelEnum::cases()[0]->value)
+                ->andReturns($mockIdeas);
+        });
 
         $category = CategoryEnum::cases()[0]->value;
         $level = LevelEnum::cases()[0]->value;
@@ -95,7 +99,8 @@ final class MainPageControllerTest extends TestCase
         );
     }
 
-    public function test_categories_are_properly_formatted(): void
+    #[Test]
+    public function categories_are_properly_formatted(): void
     {
         $response = $this->get('/');
         $categories = CategoryEnum::toArrayWithLabels();
@@ -113,7 +118,8 @@ final class MainPageControllerTest extends TestCase
         );
     }
 
-    public function test_levels_are_properly_formatted(): void
+    #[Test]
+    public function levels_are_properly_formatted(): void
     {
         $response = $this->get('/');
         $levels = LevelEnum::toArrayWithLabels();
